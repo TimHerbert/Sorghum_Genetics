@@ -27,51 +27,64 @@ if($form_data[8] != "") {
 }
 
 //Make sure data is clean for query string and build query string.
-if( $form_data[0] != "" ){
-    $gene_id = filter_var($form_data[0], FILTER_SANITIZE_STRING);
+if( isset($form_data[0]) ){
+    if( $form_data[0] != "" ){
+        $gene_id = filter_var($form_data[0], FILTER_SANITIZE_STRING);
+    }
 }
-
-if($form_data[1] != ""){
-    $pheno = filter_var($form_data[1], FILTER_SANITIZE_STRING);
-}
-
-if( $form_data[2] != "" ){
-    $impact_results = array();
-    foreach($form_data[2] as $impact_result){
-        $impact = filter_var($impact_result, FILTER_SANITIZE_STRING);
-        array_push($impact_results, $impact);
+if(isset($form_data[1])){
+    if($form_data[1] != ""){
+        $pheno = filter_var($form_data[1], FILTER_SANITIZE_STRING);
     }
 }
 
-if( $form_data[3] != "" ){
-    $effect_results = array();
-    foreach($form_data[3] as $effect_result){
-        $effect = filter_var($effect_result, FILTER_SANITIZE_STRING);
-        array_push($effect_results, $effect);
+if(isset($form_data[2])){
+    if( $form_data[2] != "" ){
+        $impact_results = array();
+        foreach($form_data[2] as $impact_result){
+            $impact = filter_var($impact_result, FILTER_SANITIZE_STRING);
+            array_push($impact_results, $impact);
+        }
+    }
+}
+if(isset($form_data[3])){
+    if( $form_data[3] != "" ){
+        $effect_results = array();
+        foreach($form_data[3] as $effect_result){
+            $effect = filter_var($effect_result, FILTER_SANITIZE_STRING);
+            array_push($effect_results, $effect);
+        }
     }
 }
 
-if( $form_data[4] != "" ){
-    $start_pos = filter_var($form_data[4], FILTER_SANITIZE_STRING);
+if(isset($form_data[4])){
+    if( $form_data[4] != "" ){
+        $start_pos = filter_var($form_data[4], FILTER_SANITIZE_STRING);
+    }
 }
-
-if( $form_data[5] != "" ){
-    $ending_pos = filter_var($form_data[5], FILTER_SANITIZE_STRING);
-}
-
-if( $form_data[6] != "" ){
-    $chromosome_results = array();
-    foreach($form_data[6] as $chromosome_result){
-        $chromosome = filter_var($chromosome_result, FILTER_SANITIZE_STRING);
-        array_push($chromosome_results, $chromosome);
+if(isset($form_data[5])){
+    if( $form_data[5] != "" ){
+        $ending_pos = filter_var($form_data[5], FILTER_SANITIZE_STRING);
     }
 }
 
-if( count($form_data[7]) != "" ){
-    $table_results = array();
-    foreach($form_data[7] as $table_result){
-        $tables = filter_var($table_result, FILTER_SANITIZE_STRING);
-        array_push($table_results, $tables);
+if(isset($form_data[6])){
+    if( $form_data[6] != "" ){
+        $chromosome_results = array();
+        foreach($form_data[6] as $chromosome_result){
+            $chromosome = filter_var($chromosome_result, FILTER_SANITIZE_STRING);
+            array_push($chromosome_results, $chromosome);
+        }
+    }
+}
+
+if(isset($form_Data[7])){
+    if( count($form_data[7]) != "" ){
+        $table_results = array();
+        foreach($form_data[7] as $table_result){
+            $tables = filter_var($table_result, FILTER_SANITIZE_STRING);
+            array_push($table_results, $tables);
+        }
     }
 }
 
