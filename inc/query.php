@@ -223,7 +223,8 @@ if( isset($table_results) ){
     
 
     if(isset($union)){
-
+        $union = 'UNION SELECT sample_id, chrom, posn, ref, allele, qual, gene, effect, impact, codon_change, amino_acid_change, sorghum_annotation FROM ' . $table_results[1] . ' ';
+        $union .= $sql_where;
     }
 }
 
@@ -231,6 +232,11 @@ if( isset($table_results) ){
 $sql_statement .= $sql_select;
 $sql_statement .= $sql_from;
 $sql_statement .= $sql_where;
+if(isset($union)){
+    $sql_statement .= $union;
+}
+
+
 
 $sql_statement .= "limit 1000;";
 // echo $sql_statement;

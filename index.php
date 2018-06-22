@@ -84,65 +84,7 @@ error_reporting(E_ALL);
 <!-- Results Section -->  
   <div class="container">
     <div class="row results">
-      <div class="col-sm-6">
-        <p>
-          Sample ID<br>
-          Output goes here.
-        </p>
-      </div>
-      <div class="col-sm-6">
-        <p>
-          Genomic Locus<br>
-          Output goes here.
-        </p>
-      </div>
-      <div class="col-sm-6">
-        <p>
-          Mutation<br>
-          Output goes here.
-        </p>
-      </div>
-      <div class="col-sm-6">
-        <p>
-          Quality<br>
-          Output goes here.
-        </p>
-      </div>
-      <div class="col-sm-6">
-        <p>
-          Gene ID<br>
-          Output goes here.
-        </p>
-      </div>
-      <div class="col-sm-6">
-        <p>
-          Effect<br>
-          Output goes here.
-        </p>
-      </div>
-      <div class="col-sm-6">
-        <p>
-          Impact<br>
-          Output goes here.
-        </p>
-      </div>
-      <div class="col-sm-6">
-        <p>
-          Codon Change<br>
-          Output goes here.
-        </p>
-      </div>
-      <div class="col-sm-6">
-        <p>
-          Amino Acid Change<br>
-          Output goes here.
-        </p>
-      </div>
-      <div class="col-sm-12">
-          <p>Sorghum Annotation<br>
-          Output goes here.
-        </p>
-      </div>
+      
     </div><!-- end of row -->
   </div><!-- end of container -->
 
