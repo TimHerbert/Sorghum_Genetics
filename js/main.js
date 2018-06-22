@@ -58,6 +58,8 @@ $(document).ready(function(){
         formData.push(chrResult);
         formData.push(tableResult);
         formData.push(name);
+
+        console.log(formData);
         
         //console.log(formData);
         var url = "inc/query.php"; // the script where you handle the form input.
@@ -66,8 +68,8 @@ $(document).ready(function(){
             url: url,   
             data: { formdata : formData }, 
             success: function (data) {
-                //console.log('Success!');
-                //console.log(data);
+                console.log('Success!');
+                console.log(data);
                 buildData(data);
             },
             error: function(data){
