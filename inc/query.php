@@ -75,192 +75,217 @@ if( count($form_data[7]) != "" ){
     }
 }
 
-
-
-//Start $sql_statement variable and init other clauses variables.
-$sql_statement = '';
-$sql_select = 'SELECT sample_id, chrom, posn, ref, allele, qual, gene, effect, impact, codon_change, amino_acid_change, sorghum_annotation ';
-$sql_from = '';
-$sql_where = '';
-
-
-//Gene ID
-if( isset($gene_id) ){
-    $sql_where .= 'WHERE gene LIKE "%' . $gene_id . '%" ';
-}
-
-//Impact
-if( isset($impact_results) ){
-    if($sql_where == ''){
-        $count = 0;
-        foreach($impact_results as $impact){
-            if($count == 0){
-                $sql_where .= 'WHERE (impact = "' . $impact . '" ';
-            } else {
-                $sql_where .= 'OR impact = "' . $impact . '" ';
-                
-            }
-            if( $count == (count($impact_results)-1) ){
-                $sql_where .= ') ';
-            }
-            $count++;
-        }
-    } else {
-        $count = 0;
-        foreach($impact_results as $impact){
-            if($count == 0){
-                $sql_where .= 'AND ( impact = "' . $impact . '" ';
-            } else {
-                $sql_where .= 'OR impact = "' . $impact . '" ';
-            }
-            if( $count == (count($impact_results)-1) ){
-                    $sql_where .= ') ';
-                }
-            $count++;
-        }
-    }
-}
-
-//Effect
-if( isset($effect_results) ){
-    if( $sql_where == '' ){
-        $count = 0;
-        foreach($effect_results as $effect){
-            if($count == 0){
-                $sql_where .= 'WHERE ( effect = "' . $effect . '" ';
-            } else {
-                $sql_where .= 'OR effect = "' . $effect . '" ';
-                
-            }
-            if( $count == (count($effect_results)-1) ){
-                $sql_where .= ') ';
-            }
-            $count++;
-        }
-    } else {
-        $count = 0;
-        foreach($effect_results as $effect){
-            if($count == 0){
-                $sql_where .= 'AND ( effect = "' . $effect . '" ';
-            } else {
-                $sql_where .= 'OR effect = "' . $effect . '" ';
-            }
-            if( $count == (count($effect_results)-1) ){
-                $sql_where .= ') ';
-            }
-            $count++;
-        }
-    }
-}
-
-
-// Chromosome
-if( isset($chromosome_results) ){
-    if($sql_where == ""){
-        $count = 0;
-        foreach($chromosome_results as $chromosome){
-            if($count == 0){
-                $sql_where .= 'WHERE ( chrom = "' . $chromosome . '" ';
-            } else {
-                $sql_where .= 'OR chrom = "' . $chromosome . '" ';
-            }
-            if( $count == (count($chromosome_results)-1) ){
-                $sql_where .= ') ';
-            }
-            $count++;
-        }
-    } else {
-        $count = 0;
-        foreach($chromosome_results as $chromosome){
-            if($count == 0){
-                $sql_where .= 'AND ( chrom = "' . $chromosome . '" ';
-            } else {
-                $sql_where .= 'OR chrom = "' . $chromosome . '" ';   
-            }
-            if( $count == (count($chromosome_results)-1) ){
-                $sql_where .= ') ';
-            }
-            $count++;
-        }
-    }
-}
-
-//Starting Position
-if( isset($start_pos) ){
-    if($sql_where == ""){
-        $sql_where .= 'WHERE posn >= "' . $start_pos . '" ';
-    } else {
-        $sql_where .= 'AND posn >= "' . $start_pos . '" ';
-    }
-}
-
-// Ending Position
-if( isset($ending_pos) ){
-    if($sql_where == ""){
-        $sql_where .= 'WHERE posn <= "' . $ending_pos . '" ';
-    } else {
-        $sql_where .= 'AND posn <= "' . $ending_pos . '" ';
-    }
-}
-
-//Phenotype String Search
-if( isset($pheno) ){
-    if($sql_where == ''){
-        $sql_where .= 'WHERE ( sorghum_annotation LIKE "%' . $pheno . '%" OR maize_annotation LIKE "%' . $pheno . '%" OR arabidopsis_annotation LIKE "%' . $pheno . '%" ) ';
-    } else {
-        $sql_where .= 'AND ( sorghum_annotation LIKE "%' . $pheno . '%" OR maize_annotation LIKE "%' . $pheno . '%" OR arabidopsis_annotation LIKE "%' . $pheno . '%" ) ';
-    }
-}
-
-
-
-// If multiple tables or not.
-if( isset($table_results) ){
-    if( count($table_results) > 1 ){
-        $union = 1;
-    }
-    $sql_from = 'FROM ' . $table_results[0] . ' ';
-    
-
-    if(isset($union)){
-        $union = 'UNION SELECT sample_id, chrom, posn, ref, allele, qual, gene, effect, impact, codon_change, amino_acid_change, sorghum_annotation FROM ' . $table_results[1] . ' ';
-        $union .= $sql_where;
-    }
-}
-
-//Assemble query
-$sql_statement .= $sql_select;
-$sql_statement .= $sql_from;
-$sql_statement .= $sql_where;
-if(isset($union)){
-    $sql_statement .= $union;
-}
-
-
-
-$sql_statement .= "limit 1000;";
-// echo $sql_statement;
+// print_r(json_encode($table_results));
 // die;
 
 
+//Array created to store results for each table queried below.
+$result_array = array(
+        "hom" => "",
+        "het" => ""
+);
 
-$result = $conn->query($sql_statement);
+/*
+    Iterate over each table selected then push to the correct place in the results array for each table. 
+*/
+foreach($table_results as $table){
+    //var_dump($table);
 
-$result_array = array();
 
-if ($result->num_rows > 0) {
-    // get the output data of each row
-    while($row = $result->fetch_assoc()) {
-        //Push everytrhing into a results array so that we can encode to json to use on the display page. 
-        array_push($result_array, $row);
+    //Start $sql_statement variable and init other clauses variables.
+    $sql_statement = '';
+    $sql_select = 'SELECT sample_id, chrom, posn, ref, allele, qual, gene, effect, impact, codon_change, amino_acid_change, sorghum_annotation, maize_annotation, arabidopsis_annotation ';
+    $sql_from = '';
+    $sql_where = '';
+
+
+    //Gene ID
+    if( isset($gene_id) ){
+        $sql_where .= 'WHERE gene LIKE "%' . $gene_id . '%" ';
     }
-    //Return the results in JSON format. 
-    print_r(json_encode($result_array));
-} else {
-    //echo "No results found.";
-    $result_array[0] = "No Results Found.";
-    print_r(json_encode($result_array));
+
+    //Impact
+    if( isset($impact_results) ){
+        if($sql_where == ''){
+            $count = 0;
+            foreach($impact_results as $impact){
+                if($count == 0){
+                    $sql_where .= 'WHERE (impact = "' . $impact . '" ';
+                } else {
+                    $sql_where .= 'OR impact = "' . $impact . '" ';
+                    
+                }
+                if( $count == (count($impact_results)-1) ){
+                    $sql_where .= ') ';
+                }
+                $count++;
+            }
+        } else {
+            $count = 0;
+            foreach($impact_results as $impact){
+                if($count == 0){
+                    $sql_where .= 'AND ( impact = "' . $impact . '" ';
+                } else {
+                    $sql_where .= 'OR impact = "' . $impact . '" ';
+                }
+                if( $count == (count($impact_results)-1) ){
+                        $sql_where .= ') ';
+                    }
+                $count++;
+            }
+        }
+    }
+
+    //Effect
+    // if( isset($effect_results) ){
+    //     if( $sql_where == '' ){
+    //         $count = 0;
+    //         foreach($effect_results as $effect){
+    //             if($count == 0){
+    //                 $sql_where .= 'WHERE ( effect = "' . $effect . '" ';
+    //             } else {
+    //                 $sql_where .= 'OR effect = "' . $effect . '" ';
+                    
+    //             }
+    //             if( $count == (count($effect_results)-1) ){
+    //                 $sql_where .= ') ';
+    //             }
+    //             $count++;
+    //         }
+    //     } else {
+    //         $count = 0;
+    //         foreach($effect_results as $effect){
+    //             if($count == 0){
+    //                 $sql_where .= 'AND ( effect = "' . $effect . '" ';
+    //             } else {
+    //                 $sql_where .= 'OR effect = "' . $effect . '" ';
+    //             }
+    //             if( $count == (count($effect_results)-1) ){
+    //                 $sql_where .= ') ';
+    //             }
+    //             $count++;
+    //         }
+    //     }
+    // }
+
+
+    // Chromosome
+    if( isset($chromosome_results) ){
+        if($sql_where == ""){
+            $count = 0;
+            foreach($chromosome_results as $chromosome){
+                if($count == 0){
+                    $sql_where .= 'WHERE ( chrom = "' . $chromosome . '" ';
+                } else {
+                    $sql_where .= 'OR chrom = "' . $chromosome . '" ';
+                }
+                if( $count == (count($chromosome_results)-1) ){
+                    $sql_where .= ') ';
+                }
+                $count++;
+            }
+        } else {
+            $count = 0;
+            foreach($chromosome_results as $chromosome){
+                if($count == 0){
+                    $sql_where .= 'AND ( chrom = "' . $chromosome . '" ';
+                } else {
+                    $sql_where .= 'OR chrom = "' . $chromosome . '" ';   
+                }
+                if( $count == (count($chromosome_results)-1) ){
+                    $sql_where .= ') ';
+                }
+                $count++;
+            }
+        }
+    }
+
+    //Starting Position
+    if( isset($start_pos) ){
+        if($sql_where == ""){
+            $sql_where .= 'WHERE posn >= "' . $start_pos . '" ';
+        } else {
+            $sql_where .= 'AND posn >= "' . $start_pos . '" ';
+        }
+    }
+
+    // Ending Position
+    if( isset($ending_pos) ){
+        if($sql_where == ""){
+            $sql_where .= 'WHERE posn <= "' . $ending_pos . '" ';
+        } else {
+            $sql_where .= 'AND posn <= "' . $ending_pos . '" ';
+        }
+    }
+
+    //Phenotype String Search
+    if( isset($pheno) ){
+        if($sql_where == ''){
+            $sql_where .= 'WHERE ( sorghum_annotation LIKE "%' . $pheno . '%" OR maize_annotation LIKE "%' . $pheno . '%" OR arabidopsis_annotation LIKE "%' . $pheno . '%" ) ';
+        } else {
+            $sql_where .= 'AND ( sorghum_annotation LIKE "%' . $pheno . '%" OR maize_annotation LIKE "%' . $pheno . '%" OR arabidopsis_annotation LIKE "%' . $pheno . '%" ) ';
+        }
+    }
+
+
+
+    // If multiple tables or not.
+    if( isset($table_results) ){
+        if( count($table_results) > 1 ){
+            $union = 1;
+        }
+        $sql_from = 'FROM ' . $table . ' ';
+        
+
+        // if(isset($union)){
+        //     $union = 'UNION SELECT sample_id, chrom, posn, ref, allele, qual, gene, effect, impact, codon_change, amino_acid_change, sorghum_annotation FROM ' . $table_results[1] . ' ';
+        //     $union .= $sql_where;
+        // }
+    }
+
+    //Assemble query
+    $sql_statement .= $sql_select;
+    $sql_statement .= $sql_from;
+    $sql_statement .= $sql_where;
+    // if(isset($union)){
+    //     $sql_statement .= $union;
+    // }
+
+
+
+    $sql_statement .= "limit 2000;";
+    // echo $sql_statement;
+    // die;
+
+
+
+    $result = $conn->query($sql_statement);
+
+    $query_result = array();
+
+    if ($result->num_rows > 0) {
+        // get the output data of each row
+        while($row = $result->fetch_assoc()) {
+            //Push everytrhing into a results array so that we can encode to json to use on the display page. 
+            array_push($query_result, $row);
+        }
+        //Return the results in JSON format. 
+        //print_r(json_encode($query_result));
+    } else {
+        //echo "No results found.";
+        $query_result[0] = "No Results Found.";
+        //print_r(json_encode($query_result));
+    }
+
+    //array_push($result_array, $query_result);
+
+    $result_array[$table] = $query_result;
+
 }
+
+print_r(json_encode($result_array));
+
+
 $conn->close();
 
 
