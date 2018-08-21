@@ -101,6 +101,9 @@ error_reporting(E_ALL);
             <select multiple class="form-control" id="table-select">
               <option val="hom" selected="selected">Hom</option>
               <option val="het" selected="selected">Het</option>
+              <option val="het_indels" selected="selected">Het Indels</option>
+              <option val="hom_indels" selected="selected">Hom Indels</option>
+
             </select>
             <small id="table-help" class="form-text text-muted">You must have at least one table selected. By default all tables are slected. <br>Deselect tables to speed up results.</small>
           </div> <!-- End of Advanced search functionality container.-->

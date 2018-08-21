@@ -137,13 +137,13 @@ $(document).ready(function(){
             url: url,   
             data: { formdata : formData }, 
             success: function (data) {
-                console.log('Success!');
-                console.log(data);
+                // console.log('Success!');
+                // console.log(data);
                 preBuildData(data);
             },
             error: function(data){
-                console.log('Error with Ajax data request. Return data:');
-                console.log(data);
+                // console.log('Error with Ajax data request. Return data:');
+                // console.log(data);
             }
         });
     });
@@ -159,6 +159,10 @@ $(document).ready(function(){
         $('#main-form').hide();
         $('.back').show();
 
+        
+
+        
+
         var html = "";
 
         html += '<div class="filter-button-container">';
@@ -173,39 +177,50 @@ $(document).ready(function(){
         html += '<div class="sorghum-accordion" id="sorghumResults">';
 
         
-        //Counters for flag / filter controls.
-        var hetStopGainedCounter    = 0;
-        var hetSpliceSiteCounter    = 0;
-        var hetOtherCounter         = 0;
 
-        //If There are het results build het.
-        if(data.het.length > 0){
+
+        $.each(data, function(key,value){
+        
+
+            //If There are het results build het.
+
             html += '<div class="het-container">';
                 html += '<div class="het-header">';
-                    html += 'Hetero Results';
-                    html += '<span class="other">' + hetOtherCounter + '</span>';
-                    html += '<span class="splice-site">' + hetSpliceSiteCounter + '</span>';
-                    html += '<span class="stop-gain">' + hetStopGainedCounter + '</span>';
-                    
-                    
+                    if(key == 'het'){
+                        html += 'Hetero Results';
+                    }
+                    if(key == 'hom'){
+                        html += 'Homogenous Results';
+                    }
+                    if(key == 'het_indels'){
+                        html += 'Hetero Indels Results';
+                    }
+                    if(key == 'hom_indels'){
+                        html += 'Homogenous Indels Results';
+                    }
+
+
+                    html += '<span class="' + key + '-other">0</span>';
+                    html += '<span class="' + key + '-splice-site">0</span>';
+                    html += '<span class="' + key + '-stop-gain">0</span>';
                 html += '</div>'; // end of het-header
 
                 html += '<div class="het-body">'
-                $(data.het).each(function(){
+                $(value).each(function(){
                     html += '<div class="container">'
                         html += '<div class="row result';
                         //add classes for filtering.
                         if(this.effect == 'STOP_GAINED'){
                             html += ' stop-gain-filter ';
-                            hetStopGainedCounter++;
+                            //stopGainedCounter++;
                         }
                         if(this.effect == 'SPLICE_SITE_DONOR'){
                             html += ' splice-site-filter ';
-                            hetSpliceSiteCounter++;
+                            //spliceSiteCounter++;
                         }
                         if(this.effect == 'START_LOST' || this.effect == 'STOP_LOST'){
                             html += ' other-filter '
-                            hetOtherCounter++;
+                            //otherCounter++;
                         }
 
                         html += '">';
@@ -239,10 +254,6 @@ $(document).ready(function(){
                                 html += '</p>';
                             html += '</div>';
 
-
-
-
-
                             //Amino Acid Change
                             html += '<div class="col-sm-2">';
                                 html += '<p>';
@@ -250,7 +261,6 @@ $(document).ready(function(){
                                     html += this.amino_acid_change;
                                 html += '</p>';
                             html += '</div>';
-
 
                             //Genomic Locus
                             html += '<div class="col-sm-2">';
@@ -284,8 +294,6 @@ $(document).ready(function(){
                                 html += '</p>';
                             html += '</div>';
 
-
-
                             //Sorghum Annotation
                             html += '<div class="col-sm-12">';
                                 html += '<p>';
@@ -310,32 +318,62 @@ $(document).ready(function(){
                                 html += '</p>';
                             html += '</div>';
 
+                        html += '</div>'; // end of row
+                    html += '</div>'; // end of container
 
-
-                            html += '</div>';
-                        html += '</div>';
-
-
-
-
-                });
+                }); // end of $(value).each()
 
                 html += '</div>'; // end of het-body
             html += '</div>'; // end of het-container
-        
-        } // end of data.het.length > 0 
+
+            
+            
+        }); // end of $.each(data)
             
 
 
         //Add HTML to page
         $(html).appendTo('.results');
 
-        //Update Filter numbers
-        $('.het-header span.other').html(hetOtherCounter);
-        $('.het-header span.splice-site').html(hetSpliceSiteCounter);
-        $('.het-header span.stop-gain').html(hetStopGainedCounter);
+        
+        $.each(data, function(key,value){
+            console.log(key);
 
-    }
+            //Counters for flag / filter controls.
+            var stopGainedCounter    = 0;
+            var spliceSiteCounter    = 0;
+            var otherCounter         = 0;
+
+            $(value).each(function(){
+                console.log('inside value');
+                console.log(this);
+
+                if(this.effect == 'STOP_GAINED'){
+                    //html += ' stop-gain-filter ';
+                    stopGainedCounter++;
+                }
+                if(this.effect == 'SPLICE_SITE_DONOR'){
+                    //html += ' splice-site-filter ';
+                    spliceSiteCounter++;
+                }
+                if(this.effect == 'START_LOST' || this.effect == 'STOP_LOST'){
+                    //html += ' other-filter '
+                    otherCounter++;
+                }
+
+            }); // end of $(value).each()
+
+            //Update Filter numbers
+            $('span.' + key + '-other').html(otherCounter);
+            $('span.' + key + '-splice-site').html(spliceSiteCounter);
+            $('span.' + key + '-stop-gain').html(stopGainedCounter);
+            //console.log(stopGainedCounter + ' stop gain');
+        }); // end of $.each(data)
+        
+
+
+        $//('span.het-other').html('245');
+    } // end of preBuildData()
 
 
 
